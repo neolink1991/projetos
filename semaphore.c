@@ -30,7 +30,6 @@
 #define MAXPIT 3// Maximum de pit par voitures
 #define FormPhys //Cela va nous permettre de prendre en compte l'accélération permatant de calculer si une voiture à fini son tour ou non
 
-
 typedef struct {
     float s1,s2,s3; // Permet de sauvegarder le temps d'une voiture pour le sector 1 / 2 / 3
     float TotalTime, Tour; //le temps total + tour.
@@ -46,9 +45,8 @@ typedef struct{
     chrono chrono;
 }voiture;
 
-typedef struct {
-    int pid[NBCARS];
-}pid;
+int shm_id1;
+voiture* shm_Pt;
 
 void initialisation_voiture(voiture *voit){
         voit->numero = 1;
@@ -68,11 +66,6 @@ float chronos(float *chrono){
     *chrono += 1;
 }
 
-/**
- * Genere un temps d'arret aléatoire entre ? et ?
- * Genere un nombre aléatoire pour savoir si la voiture va au pit ou pas
- * /!\ gerer avant l'appel un nombre aléatoire pour savoir quelle voiture sera concerner par le pit
-**/
 
 void fct_pitstop(voiture *cars ){
     int pit_alea = (rand() % 10) +1;
@@ -129,9 +122,9 @@ void acceleration(float *vitesse) {
     }
   }
 }
+
 float fonctiondistance(float vitesse){
     //Vitesse initiale( Distance + la vitesse * l'accélaration * le temps au carrée )
-    //x= xi+v.T+1/2at²
     float x;
     x=vitesse/3.6;
     return (x);
@@ -165,6 +158,40 @@ void affichage(voiture *cars){
      printf("%5.2lf m\t",cars->chrono.s3 );
      printf("Number Pit : %d\n",cars->pit);
      usleep(5000);
+}
+
+void fct_open_shm(){
+    int taille = sizeof(voiture) * NBCARS;
+    int shm_id1 = shmget(1991, (taille), IPC_CREAT | 0666 ); // ouvre ou le creee le segment
+    shm_Pt = (voiture*)shmat(shm_id1, NULL, 0); // on obtient l'address, retourn un pointer, retourne -1 si erreur et attache au process
+    if (shm_Pt == (voiture*)(-1)) // check de shmPt
+    perror("shmat");
+}
+
+void fct_sempetunia()
+{
+    int semid;
+    int value;  //SETVAL uniquement
+    union semPet{ //declaration de la structure 'union
+      struct semid_ds *buf; //IPC_STAT IPC_GET
+      ushort *array; //pour GETALL and SETALL
+    };
+
+    union semPet semPetu; //declaration de la variable de type union pour rappel, tout les champs d'une union partage le même espace mémoire qui est de la taille du plus grand champs
+    semPetu.value=NBCARS;
+
+    //Create one sem
+    if ((semid=semget(1991,1,0666 | IPC_CREAT)<0)){
+      perror("creating semaphore");
+      exit(EXIT_FAILURE);}
+      //init sem pour tous
+      if(semctl(semid,0,SETVAl,semPetu)<0){
+        perror("init");
+        exit(EXIT_FAILURE);
+
+      }
+      else printf("sem %d \n",valeur);
+    return semid;
 }
 
  int main(int argc, char* argv[]) {
