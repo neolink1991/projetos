@@ -1,4 +1,5 @@
 /*Projet de OS réalisé avec Thibault Dockx, Alexis Dufour, Sebastien Peetermans
+<<<<<<< HEAD
 */
 
 
