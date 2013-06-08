@@ -1,5 +1,5 @@
 /*Projet de OS réalisé avec Thibault Dockx, Alexis Dufour, Sebastien Peetermans
-  Version avant Fork et Semaphore.
+  Réalisation du Sema ... mise en place des tris ( Voir version prochaine ) .
 */
 
 
