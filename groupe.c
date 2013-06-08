@@ -1,3 +1,7 @@
+/*Projet de OS réalisé avec Thibault Dockx, Alexis Dufour, Sebastien Peetermans
+  Ceci est un petit coucou aux users de GitHub ! HELLO ! =D */
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/ipc.h>
