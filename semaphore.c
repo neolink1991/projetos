@@ -65,7 +65,7 @@ void initialisation_voiture(voiture *voit){
 }
 
 float chronos(float *chrono){
-    *chrono += 0.21;
+    *chrono += 1;
 }
 
 /**
@@ -78,20 +78,19 @@ void fct_pitstop(voiture *cars ){
     int pit_alea = (rand() % 10) +1;
     float pit_arret = (rand() % 8) + 1;
     if ( pit_alea == 2 && cars->pit < MAXPIT){
-      cars->chrono.Tour = pit_arret + 2;
+      cars->chrono.Tour += pit_arret + 2;
       cars->pit += 1;
       cars->vitesse = 0;
     }
 }
 
 void fct_sector(voiture *cars){ //Il faudrait remettre la distance secteur à zéro.
-/**
+
   int brokkenEngine = (rand() % 3000) + 1;
   if ( brokkenEngine == 190 ){
     cars->out = 1;
   }
-
-  else**/ if ( cars->out != 1 && cars->distance >= DISTSECTEUR1 && cars->distance < DISTSECTEUR2 )
+  if ( cars->out != 1 && cars->distance >= DISTSECTEUR1 && cars->distance < DISTSECTEUR2 )
     cars->chrono.s1=cars->chrono.Tour;
     //break;
   else if ( cars->out != 1 && cars->distance >= DISTSECTEUR2 && cars->distance < DISTSECTEUR3)
@@ -123,10 +122,10 @@ void acceleration(float *vitesse) {
   }
   else{
       if(*vitesse>=VITESSE2) {
-        *vitesse-=5;
+        *vitesse-=40;
       }
       else if(*vitesse>=VITESSEMAX1) {
-        *vitesse-=15;
+        *vitesse-=70;
     }
   }
 }
@@ -166,15 +165,6 @@ void affichage(voiture *cars){
      printf("%5.2lf m\t",cars->chrono.s3 );
      printf("Number Pit : %d\n",cars->pit);
      usleep(5000);
-}
-
-
-void depart(int nbvoitures,int id, int vitesse, double distance)
-{
-  int cpt;
-  for (cpt = 0; cpt<=nbvoitures; cpt ++){
-
-  }
 }
 
  int main(int argc, char* argv[]) {
