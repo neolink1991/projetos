@@ -1,5 +1,5 @@
 /*Projet de OS réalisé avec Thibault Dockx, Alexis Dufour, Sebastien Peetermans
-<<<<<<< HEAD
+Hello ceci est un changement pour Alexis Dufour qui ne sait pas comment utilisé un Git !!!
 */
 
 
