@@ -21,19 +21,14 @@
 #define VARIATION 5 // Variation d'accélération entre 200 et 400km/h
 #define VITESSEBASE 0 // Vitesse de base
 #define DISTANCEBASE 0 // Distance de base
-#define NBRSECTEUR 3
-#define DISTTOUR 1984
-#define DISTSECTEUR1 450
-#define DISTSECTEUR2 620
-#define DISTSECTEUR3 964
-#define IDTOUR 4
-#define TAILLEMSGQ 10
-#define NBCARS 24
+#define NBRSECTEUR 3 //Nombre de secteur du circuit
+#define DISTTOUR 1984 // taille du circuit
+#define DISTSECTEUR1 450 //  longueur du secteur 1
+#define DISTSECTEUR2 620    //longueyr du secteur 2
+#define DISTSECTEUR3 964    //longeur du secteur 36
+#define NBCARS 24   //Nombre de voitures participantes
 #define MAXPIT 3// Maximum de pit par voitures
 #define FormPhys //Cela va nous permettre de prendre en compte l'accélération permatant de calculer si une voiture à fini son tour ou non
-/*
-*/
-
 
 
 typedef struct {
