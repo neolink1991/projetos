@@ -50,26 +50,22 @@ typedef struct {
     int pid[NBCARS];
 }pid;
 
-void initialisation_voiture(voiture voit[NBCARS]){
-    int i;
-    for ( i = 0 ; i<NBCARS; i++ ){
-        voit[i].numero=i+1;
-        voit[i].chrono.Tour=0.0;
-        voit[i].vitesse=0.0;
-        voit[i].chrono.s1=0.0;
-        voit[i].chrono.s2=0.0;
-        voit[i].chrono.s3=0.0;
-        voit[i].chrono.TotalTime=0.0;
-        voit[i].distance=0.0;
-        voit[i].nbTour=0;
-        voit[i].out=0;
-        voit[i].pit = 0;
-    }
-    voit[12].numero=25;
+void initialisation_voiture(voiture *voit){
+        voit->numero = 1;
+        voit->chrono.Tour=0.0;
+        voit->vitesse=0.0;
+        voit->chrono.s1=0.0;
+        voit->chrono.s2=0.0;
+        voit->chrono.s3=0.0;
+        voit->chrono.TotalTime=0.0;
+        voit->distance=0.0;
+        voit->nbTour=0;
+        voit->out=0;
+        voit->pit = 0;
 }
 
 float chronos(float *chrono){
-    *chrono += 1;
+    *chrono += 0.21;
 }
 
 /**
@@ -89,11 +85,13 @@ void fct_pitstop(voiture *cars ){
 }
 
 void fct_sector(voiture *cars){ //Il faudrait remettre la distance secteur à zéro.
+/**
   int brokkenEngine = (rand() % 3000) + 1;
   if ( brokkenEngine == 190 ){
     cars->out = 1;
   }
-  else if ( cars->out != 1 && cars->distance >= DISTSECTEUR1 && cars->distance < DISTSECTEUR2 )
+
+  else**/ if ( cars->out != 1 && cars->distance >= DISTSECTEUR1 && cars->distance < DISTSECTEUR2 )
     cars->chrono.s1=cars->chrono.Tour;
     //break;
   else if ( cars->out != 1 && cars->distance >= DISTSECTEUR2 && cars->distance < DISTSECTEUR3)
@@ -141,37 +139,33 @@ float fonctiondistance(float vitesse){
 }
 
 //Sans doute placer le fork ici.
-void encourse(voiture cars[]){
+void encourse(voiture *cars){
     int i;
-    for (i = 0; i <= NBCARS ; i++){
-      if(cars[i].out != 1) {
-        chronos(&cars[i].chrono.Tour);
-        acceleration(&cars[i].vitesse);
-        cars[i].distance += fonctiondistance(cars[i].vitesse);
-        fct_sector(&cars[i]);
+      if(cars->out != 1) {
+        chronos(&cars->chrono.Tour);
+        acceleration(&cars->vitesse);
+        cars->distance += fonctiondistance(cars->vitesse);
+        fct_sector(cars);
       }
-    }
 }
 
-void affichage(voiture cars[NBCARS]){
+void affichage(voiture *cars){
      int i;
      encourse(cars);
      system("clear");
      printf("Voiture |\t  Chrono total |\t chrono tour |\t  Vitesse |\t Nbtour |\t Distance\n");
-     for ( i = 0; i < NBCARS ; i++){
-     printf("%d\t\t",cars[i].numero);
-     if(cars[i].out == 1) printf("Vout!");
-     printf("%4.3lf\t\t",cars[i].chrono.TotalTime);
-     printf("%8.3lf\t",cars[i].chrono.Tour);
-     printf("%3.0lf km/h\t",cars[i].vitesse);
-     printf("%d\t",cars[i].nbTour);
-     printf("%5.2lf m\t",cars[i].distance );
-     printf("%5.2lf m\t",cars[i].chrono.s1 );
-     printf("%5.2lf m\t",cars[i].chrono.s2 );
-     printf("%5.2lf m\t",cars[i].chrono.s3 );
-     printf("Number Pit : %d\n",cars[i].pit);
+     printf("%d\t\t",cars->numero);
+     if(cars->out == 1) printf("Vout!");
+     printf("%4.3lf\t\t",cars->chrono.TotalTime);
+     printf("%8.3lf\t",cars->chrono.Tour);
+     printf("%3.0lf km/h\t",cars->vitesse);
+     printf("%d\t",cars->nbTour);
+     printf("%5.2lf m\t",cars->distance );
+     printf("%5.2lf m\t",cars->chrono.s1 );
+     printf("%5.2lf m\t",cars->chrono.s2 );
+     printf("%5.2lf m\t",cars->chrono.s3 );
+     printf("Number Pit : %d\n",cars->pit);
      usleep(5000);
-     }
 }
 
 
@@ -185,10 +179,10 @@ void depart(int nbvoitures,int id, int vitesse, double distance)
 
  int main(int argc, char* argv[]) {
   srand(time(NULL)); //Random aléatoire pour chaque coup du rand();.
-  voiture cars[NBCARS];
-  initialisation_voiture(cars);
+  voiture cars;
+  initialisation_voiture(&cars);
   while(NBRSECTEUR!=1){
-  affichage(cars);
+  affichage(&cars);
   }
 }
 
