@@ -47,6 +47,7 @@ typedef struct{
 
 int shm_id1;
 voiture* shm_Pt;
+voiture tab_cars[NBCARS];
 
 void initialisation_voiture(voiture *voit){
         voit->numero = 1;
@@ -131,13 +132,14 @@ float fonctiondistance(float vitesse){
 }
 
 //Sans doute placer le fork ici.
-void encourse(voiture *cars){
+voiture encourse(voiture *cars){
     int i;
       if(cars->out != 1) {
         chronos(&cars->chrono.Tour);
         acceleration(&cars->vitesse);
         cars->distance += fonctiondistance(cars->vitesse);
         fct_sector(cars);
+        return *cars;
       }
 }
 
@@ -191,14 +193,14 @@ void fct_sempetunia()
     return semid;
 }
 //opération p pour locker accès MP pour un semaphore
-int p( int semid) {
-
+int p( int semid)
+{
     struct sembuf p_buf;
     p_buf.sem_num = 0;
     //attends que ressource soit disponible (sem_op = 1) puis prends la ressource
     p_buf.sem_op = -1;
     //on attends jusqu'à ce que le sémaphore soit libre
-    p_buf.sem_flg = SEM_UNDO;
+    //p_buf.sem_flg = SEM_UNDO;
     int valRetour = semctl(semid, 0, GETVAL, 0);
     printf("juste avant semop\n");
     //verifie la valeur du sémaphore avant d'effectuer l'opération
@@ -212,8 +214,8 @@ int p( int semid) {
     return 1;
 }
 //opération pour delocker l'accés a la MP
-int v(int semid) {
-
+int v(int semid)
+{
    struct sembuf v_buf;
    v_buf.sem_num = 0;
    //indique qu'1 ressource est dispo
@@ -231,7 +233,8 @@ int v(int semid) {
    return 1;
 }
 //verouille les 24 sémaphores pour lecture processus parent
-int pParent(int semid, int nbQualif){
+int pParent(int semid, int nbQualif)
+{
     struct sembuf p_buf;
         p_buf.sem_num = 0;
         //soit -24, -17, -10
@@ -250,7 +253,8 @@ int pParent(int semid, int nbQualif){
     return 1;
 }
 //deverouille les 24 sémaphores après lecture processus parent
-int vParent(int semid,int nbQualif){
+int vParent(int semid,int nbQualif)
+{
     struct sembuf v_buf;
     v_buf.sem_num = 0;
     //une ressource est disponible
@@ -268,11 +272,12 @@ int vParent(int semid,int nbQualif){
     return 1;
 }
 
-void processusEnfant(int numProcessus){
-    int semid;
+void processusEnfant(int numProcessus, voiture *car)
+{
+    int semid,x;
     //CHRONO voiture;
     //float chrono;
-    //CHRONO tabChTemp[nbVoiture];
+    //CHRONO tabChTemp[NBCARS];
     //srand((unsigned)time(0));
     //chrono = tempsMin + (float)rand() / ((float) RAND_MAX / (tempsMax - tempsMin));
     //voiture.Num_Voiture = numProcessus;
@@ -284,43 +289,35 @@ void processusEnfant(int numProcessus){
       printf("semaphores introuvables");
       exit(0);
     }
+    tab_cars[numProcessus] = encourse(&car);
     printf("avant lock sem processus enfant num %d, semid numero %d\n",numProcessus, semid);
     //locker semaphore
     p(semid);
     //tableau temporaire pour ecrire où on veut dans la MP
-    printf("apres lock sem processus enfant num %d\n",numProcessus);
-    int x;
-    for (x = 0; x<nbVoiture;x++){
-      tabChTemp[x] =  *shmPt;
-    }
-    tabChTemp[numProcessus] = voiture;
-    for (x = 0; x<nbVoiture;x++){
-      *shmPt = tabChTemp[x];
-    }
+    *shm_Pt = tab_cars[x];
     //delocker semaphore
     v(semid);
 }
 
 
-void creerEnfants(int nbEnfants){
-
-   //tableau de pid enfants
+void creerEnfants(int nbEnfants)
+{   //tableau de pid enfants
     pid_t tabPidEnfants[nbEnfants];
     pid_t p;
-    int enAttente,ii,i;
+    int enAttente,cpt,i;
     //allouer de la memoire pour le tab
     printf("avant fork\n");
     //creer les enfants
-    for ( ii = 0; ii < nbEnfants; ++ii) {
+    for ( cpt = 0; cpt < nbEnfants; cpt++) {
       if ((p = fork()) == 0) {
-        printf("avant processus enfant %d\n",ii);
+        printf("avant processus enfant %d\n",cpt);
         /**  PROCESSUS ENFANT VIENT ICI **/
-        processusEnfant(ii);
+        processusEnfant(cpt);
         exit(0);
         }
         else {
           /**  PROCESSUS PARENT VIENT ICI **/
-          tabPidEnfants[ii] = p;
+          tabPidEnfants[cpt] = p;
           processusParent(nbEnfants);
         }
     }
