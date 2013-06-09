@@ -49,20 +49,22 @@ int shm_id1;
 voiture* shm_Pt;
 voiture tab_cars[NBCARS];
 
-void initialisation_voiture(voiture *voit){
-        voit->numero = 1;
-        voit->chrono.Tour=0.0;
-        voit->vitesse=0.0;
-        voit->chrono.s1=0.0;
-        voit->chrono.s2=0.0;
-        voit->chrono.s3=0.0;
-        voit->chrono.TotalTime=0.0;
-        voit->distance=0.0;
-        voit->nbTour=0;
-        voit->out=0;
-        voit->pit = 0;
+void initialisation_voiture(voiture *voit[]){
+      int i;
+      for (i=0;i<NBCARS;i++){
+        voit[i]->numero = 1;
+        voit[i]->chrono.Tour=0.0;
+        voit[i]->vitesse=0.0;
+        voit[i]->chrono.s1=0.0;
+        voit[i]->chrono.s2=0.0;
+        voit[i]->chrono.s3=0.0;
+        voit[i]->chrono.TotalTime=0.0;
+        voit[i]->distance=0.0;
+        voit[i]->nbTour=0;
+        voit[i]->out=0;
+        voit[i]->pit = 0;
 }
-
+}
 float chronos(float *chrono){
     *chrono += 1;
 }
@@ -169,7 +171,7 @@ void fct_open_shm(){
     perror("shmat");
 }
 
-void fct_sempetunia()
+int fct_sempetunia()
 {
     int semid;
     union semPet{ //declaration de la structure 'union
@@ -288,7 +290,7 @@ void processusEnfant(int numProcessus, voiture *car)
       printf("semaphores introuvables");
       exit(0);
     }
-    tab_cars[numProcessus] = encourse(&car);
+    tab_cars[numProcessus] = encourse(car);
     printf("avant lock sem processus enfant num %d, semid numero %d\n",numProcessus, semid);
     //locker semaphore
     p(semid);
@@ -300,6 +302,8 @@ void processusEnfant(int numProcessus, voiture *car)
 
 void processusParent(int nbEnfants){
     int x,semid;
+
+    voiture tabCh[nbEnfants];
     //ouvrir les sémaphores qui sont crées dans le main
     semid = semget(1991, 1, 0666);
     if (semid < 0){
@@ -309,13 +313,14 @@ void processusParent(int nbEnfants){
     //on bloque le sémaphore
     pParent(semid,nbEnfants);
     //on va chercher les données en mémoire partagée
-    for (x = 0; x<nbVoiture;x++){
-      tabCh[x] =  *shmPt;
+    for (x = 0; x<NBCARS;x++){
+      tabCh[x] =  *shm_Pt;
     }
     //déverouiller le semaphore
     vParent(semid,nbEnfants);
-    for (x = 0; x<nbVoiture;x++){
-      printf("NumVoiture = %d \t Chrono = %lf  \n",tabCh[x].Num_Voiture, tabCh[x].temps);
+    int i;
+    for(i=0;i<NBCARS;i++){
+    affichage(&tabCh[i]);
     }
 }
 
@@ -363,10 +368,11 @@ void creerEnfants(int nbEnfants, voiture *cars[])
 
  int main(int argc, char* argv[]) {
   srand(time(NULL)); //Random aléatoire pour chaque coup du rand();.
-  voiture cars;
-  initialisation_voiture(&cars);
+  voiture cars[NBCARS];
+  initialisation_voiture(*cars);
   while(NBRSECTEUR!=1){
-  affichage(&cars);
+  //affichage(&cars);
+  creerEnfants(NBCARS,cars);
   }
 }
 
