@@ -168,6 +168,7 @@ void fct_open_shm(){
     int taille = sizeof(voiture) * NBCARS;
     int shm_id1 = shmget(1991, (taille), IPC_CREAT | 0666 ); // ouvre ou le creee le segment
     shm_Pt = (voiture*)shmat(shm_id1, NULL, 0); // on obtient l'address, retourn un pointer, retourne -1 si erreur et attache au process
+    printf("Neo c'est le plus beau ! \n");
     if (shm_Pt == (voiture*)(-1)) // check de shmPt
     perror("shmat");
 }
@@ -333,7 +334,8 @@ void creerEnfants(int nbEnfants, voiture cars[NBCARS])
     //allouer de la memoire pour le tab
     printf("avant fork\n");
     //creer les enfants
-    p = fct_sempetunia();
+    fct_sempetunia();
+    fct_open_shm();
     for ( cpt = 0; cpt < nbEnfants; cpt++) {
       if ((p = fork()) == 0) {
         printf("avant processus enfant %d\n",cpt);
@@ -365,7 +367,7 @@ void creerEnfants(int nbEnfants, voiture cars[NBCARS])
         }
     } while (enAttente);
     //nettoyage
-    free(tabPidEnfants);
+    //free(tabPidEnfants);
 }
 
  int main(int argc, char* argv[]) {
