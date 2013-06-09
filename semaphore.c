@@ -187,8 +187,162 @@ void fct_sempetunia()
         perror("init");
         exit(EXIT_FAILURE);
       }
-      else printf("Voici un else null");
+      else printf("Voici un else null\n");
     return semid;
+}
+//opération p pour locker accès MP pour un semaphore
+int p( int semid) {
+
+    struct sembuf p_buf;
+    p_buf.sem_num = 0;
+    //attends que ressource soit disponible (sem_op = 1) puis prends la ressource
+    p_buf.sem_op = -1;
+    //on attends jusqu'à ce que le sémaphore soit libre
+    p_buf.sem_flg = SEM_UNDO;
+    int valRetour = semctl(semid, 0, GETVAL, 0);
+    printf("juste avant semop\n");
+    //verifie la valeur du sémaphore avant d'effectuer l'opération
+    if (valRetour > 0){
+      if (semop(semid, &p_buf,1) == -1)  {
+        perror("Operation P échoué");
+        return 0;
+      }
+      printf("juste apres semop\n");
+    }
+    return 1;
+}
+//opération pour delocker l'accés a la MP
+int v(int semid) {
+
+   struct sembuf v_buf;
+   v_buf.sem_num = 0;
+   //indique qu'1 ressource est dispo
+   v_buf.sem_op = 1;
+   //on attends jusqu'à ce que le sémaphore soit libre
+   v_buf.sem_flg = SEM_UNDO;
+   int valRetour = semctl(semid, 0, GETVAL, 0);
+   //verifie la valeur du sémaphore avant d'effectuer l'opération
+   if (valRetour < 24){
+     if (semop(semid, &v_buf,1) == -1)  {
+       perror("Operation V echoué");
+       return 0;
+     }
+   }
+   return 1;
+}
+//verouille les 24 sémaphores pour lecture processus parent
+int pParent(int semid, int nbQualif){
+    struct sembuf p_buf;
+        p_buf.sem_num = 0;
+        //soit -24, -17, -10
+        p_buf.sem_op = - nbQualif;
+        //on attends jusqu'à ce que le sémaphore soit libre
+        p_buf.sem_flg = SEM_UNDO;
+    //printf ("semid = %d  , SemNum = %d",semid,p_buf.sem_num);
+    //verifie la valeur du sémaphore avant d'effectuer l'opération
+    int valRetour = semctl(semid, 0, GETVAL, 0);
+    if (valRetour == nbQualif){
+        if (semop(semid,&p_buf,1) == -1)  {
+            perror("Operation P échoué");
+            return 0;
+        }
+    }
+    return 1;
+}
+//deverouille les 24 sémaphores après lecture processus parent
+int vParent(int semid,int nbQualif){
+    struct sembuf v_buf;
+    v_buf.sem_num = 0;
+    //une ressource est disponible
+    v_buf.sem_op = nbQualif;
+    //on attends jusqu'à ce que le sémaphore soit libre
+    v_buf.sem_flg = SEM_UNDO;
+    int valRetour = semctl(semid, 0, GETVAL, 0);
+    //verifie la valeur du sémaphore avant d'effectuer l'opération
+    if (valRetour == 0){
+      if (semop(semid,&v_buf,1) == -1)  {
+        perror("Operation P échoué");
+        return 0;
+      }
+    }
+    return 1;
+}
+
+void processusEnfant(int numProcessus){
+    int semid;
+    //CHRONO voiture;
+    //float chrono;
+    //CHRONO tabChTemp[nbVoiture];
+    //srand((unsigned)time(0));
+    //chrono = tempsMin + (float)rand() / ((float) RAND_MAX / (tempsMax - tempsMin));
+    //voiture.Num_Voiture = numProcessus;
+    //voiture.temps = chrono;
+    printf("dans processus enfant num %d\n",numProcessus);
+    //ouvrir les sémaphores qui sont crées dans le main
+    semid = semget(1991, 1, 0666);
+    if (semid < 0){
+      printf("semaphores introuvables");
+      exit(0);
+    }
+    printf("avant lock sem processus enfant num %d, semid numero %d\n",numProcessus, semid);
+    //locker semaphore
+    p(semid);
+    //tableau temporaire pour ecrire où on veut dans la MP
+    printf("apres lock sem processus enfant num %d\n",numProcessus);
+    int x;
+    for (x = 0; x<nbVoiture;x++){
+      tabChTemp[x] =  *shmPt;
+    }
+    tabChTemp[numProcessus] = voiture;
+    for (x = 0; x<nbVoiture;x++){
+      *shmPt = tabChTemp[x];
+    }
+    //delocker semaphore
+    v(semid);
+}
+
+
+void creerEnfants(int nbEnfants){
+
+   //tableau de pid enfants
+    pid_t tabPidEnfants[nbEnfants];
+    pid_t p;
+    int enAttente,ii,i;
+    //allouer de la memoire pour le tab
+    printf("avant fork\n");
+    //creer les enfants
+    for ( ii = 0; ii < nbEnfants; ++ii) {
+      if ((p = fork()) == 0) {
+        printf("avant processus enfant %d\n",ii);
+        /**  PROCESSUS ENFANT VIENT ICI **/
+        processusEnfant(ii);
+        exit(0);
+        }
+        else {
+          /**  PROCESSUS PARENT VIENT ICI **/
+          tabPidEnfants[ii] = p;
+          processusParent(nbEnfants);
+        }
+    }
+    // il faut attendre que les enfants exitent pour eviter les zombies
+     do {
+        enAttente = 0;
+        for (i = 0; i < nbEnfants; ++i) {
+          if (tabPidEnfants[i] > 0) {
+            if (waitpid(tabPidEnfants[i], NULL, WNOHANG) == 0) {
+              //l'enfant a fini
+              tabPidEnfants[i] = 0;
+            }
+            else {
+              // l'enfant a pas fini
+              enAttente = 1;
+            }
+          }
+            sleep(0);
+        }
+    } while (enAttente);
+    //nettoyage
+    free(tabPidEnfants);
 }
 
  int main(int argc, char* argv[]) {
