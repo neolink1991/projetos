@@ -171,26 +171,23 @@ void fct_open_shm(){
 void fct_sempetunia()
 {
     int semid;
-    int value;  //SETVAL uniquement
     union semPet{ //declaration de la structure 'union
       struct semid_ds *buf; //IPC_STAT IPC_GET
       ushort *array; //pour GETALL and SETALL
+      int value;  //SETVAL uniquement
     };
-
     union semPet semPetu; //declaration de la variable de type union pour rappel, tout les champs d'une union partage le même espace mémoire qui est de la taille du plus grand champs
     semPetu.value=NBCARS;
-
-    //Create one sem
+    //Create one semaphore
     if ((semid=semget(1991,1,0666 | IPC_CREAT)<0)){
       perror("creating semaphore");
       exit(EXIT_FAILURE);}
       //init sem pour tous
-      if(semctl(semid,0,SETVAl,semPetu)<0){
+      if(semctl(semid,0,SETVAL,semPetu)<0){
         perror("init");
         exit(EXIT_FAILURE);
-
       }
-      else printf("sem %d \n",valeur);
+      else printf("Voici un else null");
     return semid;
 }
 
