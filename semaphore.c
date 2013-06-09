@@ -49,101 +49,101 @@ voiture* shm_Pt;
 voiture tab_cars[NBCARS];
 voiture cars[NBCARS];
 
-void initialisation_voiture(voiture voit[NBCARS]){
+void initialisation_voiture(){
     int i;
     for ( i = 0 ; i<NBCARS; i++ ){
-        voit[i].numero=i+1;
-        voit[i].chrono.Tour=0.0;
-        voit[i].vitesse=0.0;
-        voit[i].chrono.s1=0.0;
-        voit[i].chrono.s2=0.0;
-        voit[i].chrono.s3=0.0;
-        voit[i].chrono.TotalTime=0.0;
-        voit[i].distance=0.0;
-        voit[i].nbTour=0;
-        voit[i].out=0;
-        voit[i].pit = 0;
+        cars[i].numero=i+1;
+        cars[i].chrono.Tour=0.0;
+        cars[i].vitesse=0.0;
+        cars[i].chrono.s1=0.0;
+        cars[i].chrono.s2=0.0;
+        cars[i].chrono.s3=0.0;
+        cars[i].chrono.TotalTime=0.0;
+        cars[i].distance=0.0;
+        cars[i].nbTour=0;
+        cars[i].out=0;
+        cars[i].pit = 1;
     }
-    voit[12].numero=25;
+    cars[12].numero=25;
 }
-void chronos(float *chrono){
-    *chrono += 1;
+void chronos(int i){
+    cars[i].chrono.Tour += 1.0;
 }
 
 
-void fct_pitstop(voiture *cars ){
+void fct_pitstop(int i){
     int pit_alea = (rand() % 10) +1;
     float pit_arret = (rand() % 8) + 1;
-    if ( pit_alea == 2 && cars->pit < MAXPIT){
-      cars->chrono.Tour += pit_arret + 2;
-      cars->pit += 1;
-      cars->vitesse = 0;
+    if ( pit_alea == 2 && cars[i].pit < MAXPIT){
+      cars[i].chrono.Tour += pit_arret + 2;
+      cars[i].pit += 1;
+      cars[i].vitesse = 0;
     }
 }
 
-void fct_sector(voiture *cars){ //Il faudrait remettre la distance secteur à zéro.
+void fct_sector(int i){ //Il faudrait remettre la distance secteur à zéro.
 
   int brokkenEngine = (rand() % 3000) + 1;
   if ( brokkenEngine == 190 ){
-    cars->out = 1;
+   // cars[i].out = 1;
   }
-  if ( cars->out != 1 && cars->distance >= DISTSECTEUR1 && cars->distance < DISTSECTEUR2 )
-    cars->chrono.s1=cars->chrono.Tour;
+  if ( cars[i].out != 1 && cars[i].distance >= DISTSECTEUR1 && cars[i].distance < DISTSECTEUR2 )
+    cars[i].chrono.s1=cars[i].chrono.Tour;
 
-  else if ( cars->out != 1 && cars->distance >= DISTSECTEUR2 && cars->distance < DISTSECTEUR3)
-    cars->chrono.s2=cars->chrono.Tour;
+  else if ( cars[i].out != 1 && cars[i].distance >= DISTSECTEUR2 && cars[i].distance < DISTSECTEUR3)
+    cars[i].chrono.s2=cars[i].chrono.Tour;
 
-  else if ( cars->out != 1 && cars->distance >= DISTSECTEUR3 ){
-    fct_pitstop(cars);
-    cars->chrono.s3 = cars->chrono.Tour;
-    cars->chrono.TotalTime += cars->chrono.Tour;
-    cars->chrono.Tour = 0;
-    cars->nbTour += 1;
-    cars->distance = 0;
+  else if ( cars[i].out != 1 && cars[i].distance >= DISTSECTEUR3 ){
+    fct_pitstop(i);
+    cars[i].chrono.s3 = cars[i].chrono.Tour;
+    cars[i].chrono.TotalTime += cars[i].chrono.Tour;
+    cars[i].chrono.Tour = 0;
+    cars[i].nbTour += 1;
+    cars[i].distance = 0;
 
   }
 }
 
-void acceleration(float *vitesse) {
+void acceleration(int i) {
+  printf("Je vous encule\n");
   int token = (rand() % 10) + 1;
-  if ( token >= 4 ){
-    if(*vitesse<=VITESSE1) {
-       *vitesse+=ACCEL1;
+ if ( token >= 4 ){
+    if(cars[i].vitesse<=VITESSE1) {
+       cars[i].vitesse+=ACCEL1;
     }
-    else if(*vitesse<=VITESSE2) {
-       *vitesse+=ACCEL2;
+    else if(cars[i].vitesse<=VITESSE2) {
+       cars[i].vitesse+=ACCEL2;
     }
-    else if(*vitesse<=VITESSEMAX1) {
-      *vitesse+=ACCEL3;
+    else if(cars[i].vitesse<=VITESSEMAX1) {
+      cars[i].vitesse+=ACCEL3;
     }
-  }
+
   else{
-      if(*vitesse>=VITESSE2) {
-        *vitesse-=40;
+      if(cars[i].vitesse>=VITESSE2) {
+        cars[i].vitesse-=40;
       }
-      else if(*vitesse>=VITESSEMAX1) {
-        *vitesse-=70;
+      else if(cars[i].vitesse>=VITESSEMAX1) {
+        cars[i].vitesse-=70;
     }
   }
 }
-
-float fonctiondistance(float vitesse){
+}
+float fonctiondistance(int i){
     //Vitesse initiale( Distance + la vitesse * l'accélaration * le temps au carrée )
     float x;
-    x=vitesse/3.6;
+    x=cars[i].vitesse/3.6;
     return (x);
 }
 
 //Sans doute placer le fork ici.
-voiture encourse(voiture cars){
-    int i;
-      if(cars.out != 1) {
-        chronos(&cars.chrono.Tour);
+void encourse(int i){
+      if(cars[i].out != 1) {
+        chronos(i);
         printf("\nencourse\n");
-        acceleration(&cars.vitesse);
-        cars.distance += fonctiondistance(cars.vitesse);
-        fct_sector(&cars);
-        return cars;
+        acceleration(i);
+        cars[i].distance += fonctiondistance(i);
+        fct_sector(i);
+
       }
 }
 
@@ -293,19 +293,14 @@ void processusEnfant(int numProcessus)
      // exit(0);
    // }
     sleep(1);
-    carse = encourse(cars);
+    encourse(numProcessus);
     //printf("avant lock sem processus enfant num %d, seWmid numero %d\n",numProcessus, semid);
-
-   int id;
-    id=getpid();
-    printf("id %d\n",id);
-    usleep(id);
-    printf("voiture numero : %d\n", carse.numero);
-    printf("La vitesse :  %lf\n", carse.vitesse);
-    printf("Distance parcouru %lf\n", carse.distance);
-    printf("Number Tour : %d\n", carse.nbTour);
-    printf("Number PIT : %d\n", carse.pit);
-    printf("Numbertour : %5.2lf\n", carse.chrono.Tour);
+    printf("voiture numero : %d\n", cars[numProcessus].numero);
+    printf("La vitesse :  %lf\n", cars[numProcessus].vitesse);
+    printf("Distance parcouru %lf\n", cars[numProcessus].distance);
+    printf("Number Tour : %d\n", cars[numProcessus].nbTour);
+    printf("Number PIT : %d\n", cars[numProcessus].pit);
+    printf("Numbertour : %5.2lf\n", cars[numProcessus].chrono.Tour);
     //locker semaphore
 
    //p(semid);
@@ -313,7 +308,7 @@ void processusEnfant(int numProcessus)
     //*shm_Pt = tab_cars[numProcessus];
     //delocker semaphoreW
     //v(semid);
-    exit(0);
+
 }
 void processusParent(int nbEnfants){
     int x,semid;
@@ -355,6 +350,7 @@ void creerEnfants(int nbEnfants)
         //printf("avant processus enfant %d\n",cpt);
         processusEnfant(cpt);
         printf("cpt: %d\n",cpt);
+        sleep(1);
         exit(0);
 
         }
@@ -388,13 +384,30 @@ void creerEnfants(int nbEnfants)
 }
  int main(int argc, char* argv[]) {
   srand(time(NULL)); //Random aléatoire pour chaque coup du rand();.
+    int numProcessus;
 
-  initialisation_voiture(cars);
-
+initialisation_voiture();
   while(NBRSECTEUR!=1){
   //affichage(&cars);
   creerEnfants(NBCARS);
+  numProcessus=0;
 
+    printf("voiture numero : %d\n", cars[numProcessus].numero);
+    printf("La vitesse :  %lf\n", cars[numProcessus].vitesse);
+    printf("Distance parcouru %lf\n", cars[numProcessus].distance);
+    printf("Number Tour : %d\n", cars[numProcessus].nbTour);
+    printf("Number PIT : %d\n", cars[numProcessus].pit);
+    printf("Numbertour : %5.2lf\n", cars[numProcessus].chrono.Tour);
+  printf("-------------------------------------------------------------------------------------");
+  numProcessus=1;
+
+    printf("voiture numero : %d\n", cars[numProcessus].numero);
+    printf("La vitesse :  %lf\n", cars[numProcessus].vitesse);
+    printf("Distance parcouru %lf\n", cars[numProcessus].distance);
+    printf("Number Tour : %d\n", cars[numProcessus].nbTour);
+    printf("Number PIT : %d\n", cars[numProcessus].pit);
+    printf("Numbertour : %5.2lf\n", cars[numProcessus].chrono.Tour);
+  printf("-------------------------------------------------------------------------------------");
   }
 }
 
