@@ -356,7 +356,7 @@ void creerEnfants(int nbEnfants, voiture cars[NBCARS])
         enAttente = 0;
         for (i = 0; i < nbEnfants; ++i) {
           if (tabPidEnfants[i] > 0) {
-            if (waitpid(tabPidEnfants[i], NULL, WNOHANG) == 0) {
+           if (waitpid(tabPidEnfants[i], NULL, 0) == tabPidEnfants[i]) {
               //l'enfant a fini
               tabPidEnfants[i] = 0;
             }
@@ -373,7 +373,6 @@ void creerEnfants(int nbEnfants, voiture cars[NBCARS])
     //nettoyage
     //free(tabPidEnfants);
 }
-
  int main(int argc, char* argv[]) {
   srand(time(NULL)); //Random aléatoire pour chaque coup du rand();.
   voiture cars[NBCARS];
