@@ -81,7 +81,7 @@ void fct_pitstop(voiture *cars ){
     }
 }
 
-void fct_sector(voiture *cars){ //Il faudrait remettre la distance secteur à zéro.
+void fct_sector(voiture **cars){ //Il faudrait remettre la distance secteur à zéro.
 
   int brokkenEngine = (rand() % 3000) + 1;
   if ( brokkenEngine == 190 ){
@@ -142,7 +142,7 @@ voiture encourse(voiture *cars){
         printf("\nencourse\n");
         acceleration(&cars->vitesse);
         cars->distance += fonctiondistance(cars->vitesse);
-        fct_sector(cars);
+        fct_sector(&cars);
         return *cars;
       }
 }
@@ -169,7 +169,7 @@ void fct_open_shm(){
     int taille = sizeof(voiture) * NBCARS;
     int shm_id1 = shmget(1991, (taille), IPC_CREAT | 0666 ); // ouvre ou le creee le segment
     shm_Pt = (voiture*)shmat(shm_id1, NULL, 0); // on obtient l'address, retourn un pointer, retourne -1 si erreur et attache au process
-    printf("Neo c'est le plus beau ! \n");
+    //printf("Neo c'est le plus beau ! \n");
     if (shm_Pt == (voiture*)(-1)) // check de shmPt
     perror("shmat");
 }
@@ -191,10 +191,8 @@ int fct_sempetunia()
       //init sem pour tous
       if(semctl(semid,0,SETVAL,semPetu)<0){
         perror("init");
-        printf("/n< prout de bite/n");
         exit(EXIT_FAILURE);
       }
-      else printf("Voici un else null\n");
     return semid;
 }
 //opération p pour locker accès MP pour un semaphore
@@ -207,14 +205,13 @@ int p( int semid)
     //on attends jusqu'à ce que le sémaphore soit libre
     //p_buf.sem_flg = SEM_UNDO;
     int valRetour = semctl(semid, 0, GETVAL, 0);
-    printf("juste avant semop\n");
+    //printf("juste avant semop\n");
     //verifie la valeur du sémaphore avant d'effectuer l'opération
     if (valRetour > 0){
       if (semop(semid, &p_buf,1) == -1)  {
         perror("Operation P échoué");
         return 0;
       }
-      printf("juste apres semop\n");
     }
     return 1;
 }
@@ -287,15 +284,20 @@ void processusEnfant(int numProcessus, voiture car)
     //chrono = tempsMin + (float)rand() / ((float) RAND_MAX / (tempsMax - tempsMin));
     //voiture.Num_Voiture = numProcessus;
     //voiture.temps = chrono;
-    printf("dans processus enfant num %d\n",numProcessus);
+    //printf("dans processus enfant num %d\n",numProcessus);
     //ouvrir les sémaphores qui sont crées dans le main
     semid = semget(1991, 1, 0666);
     if (semid < 0){
-      printf("semaphores introuvables");
+      //printf("semaphores introuvables");
       exit(0);
     }
     tab_cars[numProcessus] = encourse(&car);
-    printf("avant lock sem processus enfant num %d, semid numero %d\n",numProcessus, semid);
+    //printf("avant lock sem processus enfant num %d, semid numero %d\n",numProcessus, semid);
+    printf("voiture numero : %d\n", tab_cars[numProcessus].numero);
+    printf("La vitesse :  %lf\n", tab_cars[numProcessus].vitesse);
+    printf("Distance parcouru %lf\n", tab_cars[numProcessus].distance);
+    printf("Number Tour : %d\n", tab_cars[numProcessus].nbTour);
+    printf("Number PIT : %d\n", tab_cars[numProcessus].pit);
     //locker semaphore
     p(semid);
     //tableau temporaire pour ecrire où on veut dans la MP
@@ -303,7 +305,6 @@ void processusEnfant(int numProcessus, voiture car)
     //delocker semaphore
     v(semid);
 }
-
 void processusParent(int nbEnfants){
     int x,semid;
 
@@ -334,19 +335,17 @@ void creerEnfants(int nbEnfants, voiture cars[NBCARS])
     pid_t p;
     int enAttente,cpt,i;
     //allouer de la memoire pour le tab
-    printf("avant fork\n");
+    //printf("avant fork\n");
     //creer les enfants
     fct_sempetunia();
     fct_open_shm();
     for ( cpt = 0; cpt < nbEnfants; cpt++) {
       if ((p = fork()) == 0) {
-        printf("avant processus enfant %d\n",cpt);
-        /**  PROCESSUS ENFANT VIENT ICI **/
+        //printf("avant processus enfant %d\n",cpt);
         processusEnfant(cpt,cars[cpt]);
         exit(0);
         }
         else {
-          /**  PROCESSUS PARENT VIENT ICI **/
           tabPidEnfants[cpt] = p;
           //processusParent(cars);
         }
@@ -367,7 +366,7 @@ void creerEnfants(int nbEnfants, voiture cars[NBCARS])
           }
             sleep(0);
         }
-        printf("je boucle mais je fais rien !!!\n");
+        //printf("je boucle mais je fais rien !!!\n");
         //if (waitpid(tabPidEnfants[i], NULL, 0) == tabPidEnfants[i])
     } while (enAttente);
     //nettoyage
@@ -380,7 +379,6 @@ void creerEnfants(int nbEnfants, voiture cars[NBCARS])
   while(NBRSECTEUR!=1){
   //affichage(&cars);
   creerEnfants(NBCARS,cars);
-
   }
 }
 
