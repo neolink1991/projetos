@@ -49,21 +49,22 @@ int shm_id1;
 voiture* shm_Pt;
 voiture tab_cars[NBCARS];
 
-void initialisation_voiture(voiture *voit[]){
-      int i;
-      for (i=0;i<NBCARS;i++){
-        voit[i]->numero = 1;
-        voit[i]->chrono.Tour=0.0;
-        voit[i]->vitesse=0.0;
-        voit[i]->chrono.s1=0.0;
-        voit[i]->chrono.s2=0.0;
-        voit[i]->chrono.s3=0.0;
-        voit[i]->chrono.TotalTime=0.0;
-        voit[i]->distance=0.0;
-        voit[i]->nbTour=0;
-        voit[i]->out=0;
-        voit[i]->pit = 0;
-}
+void initialisation_voiture(voiture voit[NBCARS]){
+    int i;
+    for ( i = 0 ; i<NBCARS; i++ ){
+        voit[i].numero=i+1;
+        voit[i].chrono.Tour=0.0;
+        voit[i].vitesse=0.0;
+        voit[i].chrono.s1=0.0;
+        voit[i].chrono.s2=0.0;
+        voit[i].chrono.s3=0.0;
+        voit[i].chrono.TotalTime=0.0;
+        voit[i].distance=0.0;
+        voit[i].nbTour=0;
+        voit[i].out=0;
+        voit[i].pit = 0;
+    }
+    voit[12].numero=25;
 }
 float chronos(float *chrono){
     *chrono += 1;
@@ -273,7 +274,7 @@ int vParent(int semid,int nbQualif)
     return 1;
 }
 
-void processusEnfant(int numProcessus, voiture *car)
+void processusEnfant(int numProcessus, voiture car)
 {
     int semid,x;
     //CHRONO voiture;
@@ -290,7 +291,7 @@ void processusEnfant(int numProcessus, voiture *car)
       printf("semaphores introuvables");
       exit(0);
     }
-    tab_cars[numProcessus] = encourse(car);
+    tab_cars[numProcessus] = encourse(&car);
     printf("avant lock sem processus enfant num %d, semid numero %d\n",numProcessus, semid);
     //locker semaphore
     p(semid);
@@ -324,7 +325,7 @@ void processusParent(int nbEnfants){
     }
 }
 
-void creerEnfants(int nbEnfants, voiture *cars[])
+void creerEnfants(int nbEnfants, voiture cars[NBCARS])
 {   //tableau de pid enfants
     pid_t tabPidEnfants[nbEnfants];
     pid_t p;
@@ -332,6 +333,7 @@ void creerEnfants(int nbEnfants, voiture *cars[])
     //allouer de la memoire pour le tab
     printf("avant fork\n");
     //creer les enfants
+    p = fct_sempetunia();
     for ( cpt = 0; cpt < nbEnfants; cpt++) {
       if ((p = fork()) == 0) {
         printf("avant processus enfant %d\n",cpt);
@@ -369,7 +371,7 @@ void creerEnfants(int nbEnfants, voiture *cars[])
  int main(int argc, char* argv[]) {
   srand(time(NULL)); //Random aléatoire pour chaque coup du rand();.
   voiture cars[NBCARS];
-  initialisation_voiture(*cars);
+  initialisation_voiture(cars);
   while(NBRSECTEUR!=1){
   //affichage(&cars);
   creerEnfants(NBCARS,cars);
