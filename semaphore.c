@@ -145,7 +145,6 @@ voiture encourse(voiture *cars){
 
 void affichage(voiture *cars){
      int i;
-     encourse(cars);
      system("clear");
      printf("Voiture |\t  Chrono total |\t chrono tour |\t  Vitesse |\t Nbtour |\t Distance\n");
      printf("%d\t\t",cars->numero);
@@ -181,7 +180,7 @@ void fct_sempetunia()
     union semPet semPetu; //declaration de la variable de type union pour rappel, tout les champs d'une union partage le même espace mémoire qui est de la taille du plus grand champs
     semPetu.value=NBCARS;
     //Create one semaphore
-    if ((semid=semget(1991,1,0666 | IPC_CREAT)<0)){
+    if ((semid=semget(1991,1,0666 | IPC_CREAT)<0)){  //préférable d'utiliser un ftoken ... peut être !
       perror("creating semaphore");
       exit(EXIT_FAILURE);}
       //init sem pour tous
@@ -294,13 +293,33 @@ void processusEnfant(int numProcessus, voiture *car)
     //locker semaphore
     p(semid);
     //tableau temporaire pour ecrire où on veut dans la MP
-    *shm_Pt = tab_cars[x];
+    *shm_Pt = tab_cars[numProcessus];
     //delocker semaphore
     v(semid);
 }
 
+void processusParent(int nbEnfants){
+    int x,semid;
+    //ouvrir les sémaphores qui sont crées dans le main
+    semid = semget(1991, 1, 0666);
+    if (semid < 0){
+      printf("semaphores introuvables processus parent");
+      exit(0);
+    }
+    //on bloque le sémaphore
+    pParent(semid,nbEnfants);
+    //on va chercher les données en mémoire partagée
+    for (x = 0; x<nbVoiture;x++){
+      tabCh[x] =  *shmPt;
+    }
+    //déverouiller le semaphore
+    vParent(semid,nbEnfants);
+    for (x = 0; x<nbVoiture;x++){
+      printf("NumVoiture = %d \t Chrono = %lf  \n",tabCh[x].Num_Voiture, tabCh[x].temps);
+    }
+}
 
-void creerEnfants(int nbEnfants)
+void creerEnfants(int nbEnfants, voiture *cars[])
 {   //tableau de pid enfants
     pid_t tabPidEnfants[nbEnfants];
     pid_t p;
@@ -312,13 +331,13 @@ void creerEnfants(int nbEnfants)
       if ((p = fork()) == 0) {
         printf("avant processus enfant %d\n",cpt);
         /**  PROCESSUS ENFANT VIENT ICI **/
-        processusEnfant(cpt);
+        processusEnfant(cpt,cars[cpt]);
         exit(0);
         }
         else {
           /**  PROCESSUS PARENT VIENT ICI **/
           tabPidEnfants[cpt] = p;
-          processusParent(nbEnfants);
+          //processusParent(cars);
         }
     }
     // il faut attendre que les enfants exitent pour eviter les zombies
