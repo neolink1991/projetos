@@ -139,6 +139,7 @@ voiture encourse(voiture *cars){
     int i;
       if(cars->out != 1) {
         chronos(&cars->chrono.Tour);
+        printf("\nencourse\n");
         acceleration(&cars->vitesse);
         cars->distance += fonctiondistance(cars->vitesse);
         fct_sector(cars);
@@ -190,6 +191,7 @@ int fct_sempetunia()
       //init sem pour tous
       if(semctl(semid,0,SETVAL,semPetu)<0){
         perror("init");
+        printf("/n< prout de bite/n");
         exit(EXIT_FAILURE);
       }
       else printf("Voici un else null\n");
@@ -365,6 +367,8 @@ void creerEnfants(int nbEnfants, voiture cars[NBCARS])
           }
             sleep(0);
         }
+        printf("je boucle mais je fais rien !!!\n");
+        //if (waitpid(tabPidEnfants[i], NULL, 0) == tabPidEnfants[i])
     } while (enAttente);
     //nettoyage
     //free(tabPidEnfants);
@@ -377,6 +381,7 @@ void creerEnfants(int nbEnfants, voiture cars[NBCARS])
   while(NBRSECTEUR!=1){
   //affichage(&cars);
   creerEnfants(NBCARS,cars);
+
   }
 }
 
