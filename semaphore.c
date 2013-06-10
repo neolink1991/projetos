@@ -1,8 +1,6 @@
 /*Projet de OS réalisé avec Thibault Dockx, Alexis Dufour, Sebastien Peetermans
   Réalisation du Sema ... mise en place des tris ( Voir version prochaine ) .
 */
-
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -51,7 +49,7 @@ typedef struct{
 
 int shm_id1;
 voiture * shm_Pt;
-voiture tab_cars[NBCARS];
+voiture tricars[NBCARS];
 voiture cars[NBCARS];
 
 /**
@@ -418,7 +416,7 @@ void processusParent() {
   // for (x = 0; x<NBCARS;x++){
   //  tabCh[x] =  *shm_Pt;
   // }
-  affichage();
+  //affichage();
   //déverouiller le semaphore
   vParent(semid, NBCARS);
   //int i;
@@ -481,6 +479,10 @@ void creerEnfants(int nbEnfants) {   //tableau de pid enfants
   free(tabPidEnfants);
 }
 
+void triVoiture() {
+  tricars
+}
+
 /**
  * MAIN
 **/
@@ -496,7 +498,9 @@ int main() {
   for(i=0; i<valeurMax; i++) {
     //affichage(&cars);
     creerEnfants(NBCARS);
-    //  printf("=======num boucle main %d\n",i);
+    /**FONCTION DE TRI --ICI--**/
+    affichage();
+    //printf("=======num boucle main %d\n",i);
   }
   return(0);
 }
