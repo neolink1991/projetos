@@ -158,21 +158,21 @@ void encourse(int i){
 void affichage(){
      int i;
      system("clear");
-     printf("Voiture |\t  Chrono total |\t chrono tour |\t  Vitesse |\t Nbtour |\t Distance\n");
+     printf("Num |\tChrono | Tour | Vitesse | Nbtour | Distance  |  s1   |  s2  |  s3   | PIT |\n");
      for(i=0; i<NBCARS; i++) {
-         printf("%d\t\t",shm_Pt[i].numero);
+         printf("%2d\t",shm_Pt[i].numero);
          if(cars[i].out == 1) printf("Vout!");
-         printf("%4.3lf\t\t",shm_Pt[i].chrono.TotalTime);
-         printf("%8.3lf\t",shm_Pt[i].chrono.Tour);
-         printf("%3.0lf km/h\t",shm_Pt[i].vitesse);
-         printf("%d\t",shm_Pt[i].nbTour);
-         printf("%5.2lf m\t",shm_Pt[i].distance );
-         printf("%5.2lf m\t",shm_Pt[i].chrono.s1 );
-         printf("%5.2lf m\t",shm_Pt[i].chrono.s2 );
-         printf("%5.2lf m\t",shm_Pt[i].chrono.s3 );
-         printf("Number Pit : %d\n",shm_Pt[i].pit);
-         //usleep(5000);
+         printf("%4.3lf ",shm_Pt[i].chrono.TotalTime);
+         printf("%8.3lf ",shm_Pt[i].chrono.Tour);
+         printf("%3.0lf km/h      ",shm_Pt[i].vitesse);
+         printf("%d       ",shm_Pt[i].nbTour);
+         printf("%5.2lf m ",shm_Pt[i].distance );
+         printf("%5.2lf m ",shm_Pt[i].chrono.s1 );
+         printf("%5.2lf m ",shm_Pt[i].chrono.s2 );
+         printf("%5.2lf m    ",shm_Pt[i].chrono.s3 );
+         printf("%d\n",shm_Pt[i].pit);
      }
+     sleep(1);
 }
 
 void fct_open_shm(){
