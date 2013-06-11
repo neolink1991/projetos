@@ -51,6 +51,19 @@ voiture tricars[NBCARS];
 voiture cars[NBCARS];
 
 /**
+ * AFFICHER MENU
+**/
+affiherMenu() {
+  system("clear");
+  printf(" GRAND PRIX DE FORMULE 1\n");
+  printf(" -----------------------\n");
+  printf(" 1. ESSAIS\n");
+  printf(" 2. QUALIFS\n");
+  printf(" 3. COURSE\n\n");
+  printf(" Votre choix : ");
+}
+
+/**
  * INITIALISATION
 **/
 void initialisation_voiture() {
@@ -224,17 +237,18 @@ void affichage(){
   system("clear");
   printf("Num |\tChrono | Tour | Vitesse | Nbtour | Distance  |  s1   |  s2  |  s3   | PIT |\n");
   for(i=0; i<NBCARS; i++) {
-   printf("%2d\t",shm_Pt[i].numero);
-   if(shm_Pt[i].out == 1) printf("Vout!");
-   printf("%4.3lf ",shm_Pt[i].chrono.TotalTime);
-   printf("%8.3lf ",shm_Pt[i].chrono.Tour);
-   printf("%3.0lf km/h      ",shm_Pt[i].vitesse);
-   printf("%2d       ",shm_Pt[i].nbTour);
-   printf("%5.2lf m ",shm_Pt[i].distance );
-   printf("%5.2lf m ",shm_Pt[i].chrono.s1 );
-   printf("%5.2lf m ",shm_Pt[i].chrono.s2 );
-   printf("%5.2lf m    ",shm_Pt[i].chrono.s3 );
-   printf("%d\n",shm_Pt[i].pit);
+    if(shm_Pt[i].out == 1) printf(RED);
+    printf("%2d\t",shm_Pt[i].numero);
+    printf("%4.3lf ",shm_Pt[i].chrono.TotalTime);
+    printf("%8.3lf ",shm_Pt[i].chrono.Tour);
+    printf("%3.0lf km/h      ",shm_Pt[i].vitesse);
+    printf("%2d       ",shm_Pt[i].nbTour);
+    printf("%5.2lf m ",shm_Pt[i].distance );
+    printf("%5.2lf s ",shm_Pt[i].chrono.s1 );
+    printf("%5.2lf s ",shm_Pt[i].chrono.s2 );
+    printf("%5.2lf s    ",shm_Pt[i].chrono.s3 );
+    printf("%d\n",shm_Pt[i].pit);
+    printf("\x1b[37m");
   }
   besttours1 = find_best_sector1();
   besttours2 = find_best_sector2();
@@ -415,38 +429,38 @@ void initMp() {
  * CREER ENFANTS
  * changer nom anti foutre Seb Et shubba dasn la merde
 **/
-void creerEnfants(int nbEnfants) {   //tableau de pid enfants
-  pid_t *tabPidEnfants;
+void go_f1(int nfn1) {   //tableau de pid enfants
+  pid_t *tab_f1;
   pid_t p;
-  int a, enAttente, cpt, i;
+  int a, waitte, cpt, i;
   int iii=0;
-  tabPidEnfants = malloc(nbEnfants * sizeof(pid_t));
+  tab_f1 = malloc(nfn1 * sizeof(pid_t));
   a = fct_sempetunia();
   printf("a: %d\n", a);
-  for ( cpt = 0; cpt < nbEnfants; cpt++) {
+  for ( cpt = 0; cpt < nfn1; cpt++) {
     if ((p = fork()) == 0) {
       f_un(cpt);
       exit(0);
     } else {
-      tabPidEnfants[cpt] = p;
+      tab_f1[cpt] = p;
       usleep(1000); /** ---------------------REGULE LA VITESSE DU PROGRAMME-------------------------- **/
       iii++;
     }
   }
   do {
-    enAttente = 0;
-    for (i=0; i<nbEnfants; i++) {
-      if (tabPidEnfants[i] > 0) {
-        if (waitpid(tabPidEnfants[i], NULL, 0) == tabPidEnfants[i]) {
-          tabPidEnfants[i] = 0;
+    waitte = 0;
+    for (i=0; i<nfn1; i++) {
+      if (tab_f1[i] > 0) {
+        if (waitpid(tab_f1[i], NULL, 0) == tab_f1[i]) {
+          tab_f1[i] = 0;
         } else {
-          enAttente = 1;
+          waitte = 1;
         }
       }
       sleep(0);
     }
-  } while (enAttente);
-  free(tabPidEnfants);
+  } while (waitte);
+  free(tab_f1);
 }
 
 /**
@@ -489,7 +503,7 @@ afficheVainqueurs() {
 void competition(){
   int last = NBCARS -1;
   while (shm_Pt[last].nbTour < NBTOURS) {
-    creerEnfants(NBCARS);
+    go_f1(NBCARS);
     usleep(20);
     triCourse();
     affichage();
@@ -544,7 +558,7 @@ int main() {
   initMp();
 
   for(i=0; i<valeurMax; i++) {
-    creerEnfants(NBCARS);
+    go_f1(NBCARS);
     usleep(20);
     triCourse();
     affichage();
