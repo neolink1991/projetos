@@ -49,7 +49,7 @@ typedef struct{
 
 int shm_id1;
 voiture * shm_Pt;
-voiture tricars[NBCARS+1];
+voiture tricars[NBCARS];
 voiture cars[NBCARS];
 
 /**
@@ -103,7 +103,7 @@ void fct_sector(int i){ //Il faudrait remettre la distance secteur à zéro.
   int brokkenEngine;
 
   brokkenEngine = (rand() % 3000) + 1;
-  if ( brokkenEngine == 190 ){
+  if ( brokkenEngine == 190 ) {
   // shm_Pt[i].out = 1;
   }
 
@@ -177,29 +177,47 @@ void encourse(int i){
   }
 }
 
+
+
 //http://en.wikipedia.org/wiki/ANSI_escape_code
 /**
  * AFFICHAGE
 **/
 void affichage(){
-   int i;
-   system("clear");
-   printf("Num |\tChrono | Tour | Vitesse | Nbtour | Distance  |  s1   |  s2  |  s3   | PIT |\n");
-   for(i=0; i<NBCARS; i++) {
-     printf("%2d\t",shm_Pt[i].numero);
-     //CHANGER PAR COULEUR
-     if(cars[i].out == 1) printf("Vout!");
-     printf("%4.3lf ",shm_Pt[i].chrono.TotalTime);
-     printf("%8.3lf ",shm_Pt[i].chrono.Tour);
-     printf("%3.0lf km/h      ",shm_Pt[i].vitesse);
-     printf("%2d       ",shm_Pt[i].nbTour);
-     printf("%5.2lf m ",shm_Pt[i].distance );
-     printf("%5.2lf m ",shm_Pt[i].chrono.s1 );
-     printf("%5.2lf m ",shm_Pt[i].chrono.s2 );
-     printf("%5.2lf m    ",shm_Pt[i].chrono.s3 );
-     printf("%d\n",shm_Pt[i].pit);
+   int i, copie;
+
+  system("clear");
+  printf("Num |\tChrono | Tour | Vitesse | Nbtour | Distance  |  s1   |  s2  |  s3   | PIT |\n");
+  for(i=0; i<NBCARS; i++) {
+
+   printf("%2d\t",shm_Pt[i].numero);
+   //CHANGER PAR COULEUR
+   if(shm_Pt[i].out == 1) printf("Vout!");
+   printf("%4.3lf ",shm_Pt[i].chrono.TotalTime);
+   printf("%8.3lf ",shm_Pt[i].chrono.Tour);
+   printf("%3.0lf km/h      ",shm_Pt[i].vitesse);
+   printf("%2d       ",shm_Pt[i].nbTour);
+   printf("%5.2lf m ",shm_Pt[i].distance );
+   printf("%5.2lf m ",shm_Pt[i].chrono.s1 );
+   printf("%5.2lf m ",shm_Pt[i].chrono.s2 );
+   printf("%5.2lf m    ",shm_Pt[i].chrono.s3 );
+   printf("%d\n",shm_Pt[i].pit);
+   /**
+   printf("%2d\t",tricars[i].numero);
+   //CHANGER PAR COULEUR
+   if(tricars[i].out == 1) printf("Vout!");
+   printf("%4.3lf ",tricars[i].chrono.TotalTime);
+   printf("%8.3lf ",tricars[i].chrono.Tour);
+   printf("%3.0lf km/h      ",tricars[i].vitesse);
+   printf("%2d       ",tricars[i].nbTour);
+   printf("%5.2lf m ",tricars[i].distance );
+   printf("%5.2lf m ",tricars[i].chrono.s1 );
+   printf("%5.2lf m ",tricars[i].chrono.s2 );
+   printf("%5.2lf m    ",tricars[i].chrono.s3 );
+   printf("%d\n",tricars[i].pit);
+   **/
    }
-   usleep(100);
+   //usleep(100);
 }
 
 /**
@@ -341,7 +359,7 @@ int vParent(int semid, int nbQualif) {
  * PROCESSUS ENFANT
 **/
 void processusEnfant(int numProcessus) {
-  voiture tuture;
+  //voiture tuture;
   int semid;
   //CHRONO voiture;
   //float chrono;
@@ -360,6 +378,8 @@ void processusEnfant(int numProcessus) {
   // sleep(1);
   encourse(numProcessus);
   //printf("avant lock sem processus enfant num %d, seWmid numero %d\n",numProcessus, semid);
+  /**
+  SERT D'EXEMPLE ECRITURE MEMOIRE PARTAGER
   tuture.numero = cars[numProcessus].numero;
   tuture.vitesse = cars[numProcessus].vitesse;
   tuture.distance = cars[numProcessus].distance;
@@ -371,6 +391,7 @@ void processusEnfant(int numProcessus) {
   tuture.chrono.s1 = cars[numProcessus].chrono.s1;
   tuture.chrono.s2 = cars[numProcessus].chrono.s2;
   tuture.chrono.s3 = cars[numProcessus].chrono.s3;
+  **/
   p(semid);
   //tableau temporaire pour ecrire où on veut dans la MP
   // shm_Pt[numProcessus] = tuture;
@@ -452,9 +473,9 @@ void creerEnfants(int nbEnfants) {   //tableau de pid enfants
       exit(0);
     } else {
       tabPidEnfants[cpt] = p;
-      usleep(55000);
+      usleep(1000); /** ---------------------REGULE LA VITESSE DU PROGRAMME-------------------------- **/
       processusParent(NBCARS);
-      printf("=======%d\n",iii);
+      //printf("=======%d\n",iii);
       iii++;
     }
   }
@@ -479,17 +500,32 @@ void creerEnfants(int nbEnfants) {   //tableau de pid enfants
   free(tabPidEnfants);
 }
 
-//void triVoiture() {
-//  tricars
-//}
+/**
+ * FONCTION DE TRI
+ * shm_Pt, tricars
+**/
+void triVoiture() {
+  voiture tmp;
+  int i, j;
+
+  for (i=0; i<NBCARS-1; i++) {
+    for (j=1; j<NBCARS; j++) {
+      if (shm_Pt[i].chrono.TotalTime < shm_Pt[j].chrono.TotalTime) {
+        tmp = shm_Pt[i];
+        shm_Pt[i] = shm_Pt[j];
+        shm_Pt[j] = tmp;
+      }
+    }
+  }
+}
 
 /**
  * MAIN
 **/
 int main() {
   //Random aléatoire pour chaque coup du rand();.
-  int valeurMax = 100;
-  int i;
+  int valeurMax = 1000;
+  int i, copie;
 
   fct_open_shm();
   initialisation_voiture();
@@ -498,8 +534,16 @@ int main() {
   for(i=0; i<valeurMax; i++) {
     //affichage(&cars);
     creerEnfants(NBCARS);
+    /**COPIE TABLEAU 1 DANS TABLEAU 2 **/
+    /**
+    for(copie=0; copie<NBCARS; copie++) {
+      tricars[i] = shm_Pt[i];
+    }
+    **/
     /**FONCTION DE TRI --ICI--**/
+    triVoiture();
     affichage();
+    printf("===========%d\n",i);
     //printf("=======num boucle main %d\n",i);
   }
   return(0);
