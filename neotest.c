@@ -254,8 +254,8 @@ void affichage(){
    besttours2 = find_best_sector2();
    besttours3 = find_best_sector3();
    printf("\nBest voiture Sector 1 : %d\n", besttours1);
-   printf("\nBest voiture Sector 1 : %d\n", besttours2);
-   printf("\nBest voiture Sector 1 : %d\n\n", besttours3);
+   printf("\nBest voiture Sector 2 : %d\n", besttours2);
+   printf("\nBest voiture Sector 3 : %d\n\n", besttours3);
    //usleep(100);
 }
 
