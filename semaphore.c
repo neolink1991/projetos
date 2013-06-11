@@ -1,4 +1,4 @@
-/*Projet de OS réalisé avec Thibault Dockx, Alexis Dufour, Sebastien Peetermans
+W/*Projet de OS réalisé avec Thibault Dockx, Alexis Dufour, Sebastien Peetermans
   Réalisation du Sema ... mise en place des tris ( Voir version prochaine ) .
 */
 #include <stdlib.h>
