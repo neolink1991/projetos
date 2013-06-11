@@ -191,14 +191,48 @@ void encourse(int i){
   }
 }
 
+int find_best_sector1 (){
+  int numvoiture,i;
+  float refe = 50000;
+  for (i=0; i<NBCARS; i++) {
+    if ( shm_Pt[i].chrono.best_s1 < refe){
+      refe = shm_Pt[i].chrono.best_s1;
+      numvoiture = shm_Pt[i].numero;
+    }
+  }
+  return numvoiture;
+}
 
+int find_best_sector2 (){
+  int numvoiture,i;
+  float refe = 50000;
+  for (i=0; i<NBCARS; i++) {
+    if ( shm_Pt[i].chrono.best_s2 < refe){
+      refe = shm_Pt[i].chrono.best_s2;
+      numvoiture = shm_Pt[i].numero;
+    }
+  }
+  return numvoiture;
+}
+
+int find_best_sector3 (){
+  int numvoiture,i;
+  float refe = 50000;
+  for (i=0; i<NBCARS; i++) {
+    if ( shm_Pt[i].chrono.best_s3 < refe){
+      refe = shm_Pt[i].chrono.best_s3;
+      numvoiture = shm_Pt[i].numero;
+    }
+  }
+  return numvoiture;
+}
 
 //http://en.wikipedia.org/wiki/ANSI_escape_code
 /**
  * AFFICHAGE
 **/
 void affichage(){
-  int i, copie;
+  int i, copie, besttours1, besttours2, besttours3;
   system("clear");
   printf("Num |\tChrono | Tour | Vitesse | Nbtour | Distance  |  s1   |  s2  |  s3   | PIT |\n");
   for(i=0; i<NBCARS; i++) {
@@ -215,21 +249,13 @@ void affichage(){
    printf("%5.2lf m ",shm_Pt[i].chrono.s2 );
    printf("%5.2lf m    ",shm_Pt[i].chrono.s3 );
    printf("%d\n",shm_Pt[i].pit);
-   /**
-   printf("%2d\t",tricars[i].numero);
-   //CHANGER PAR COULEUR
-   if(tricars[i].out == 1) printf("Vout!");
-   printf("%4.3lf ",tricars[i].chrono.TotalTime);
-   printf("%8.3lf ",tricars[i].chrono.Tour);
-   printf("%3.0lf km/h      ",tricars[i].vitesse);
-   printf("%2d       ",tricars[i].nbTour);
-   printf("%5.2lf m ",tricars[i].distance );
-   printf("%5.2lf m ",tricars[i].chrono.s1 );
-   printf("%5.2lf m ",tricars[i].chrono.s2 );
-   printf("%5.2lf m    ",tricars[i].chrono.s3 );
-   printf("%d\n",tricars[i].pit);
-   **/
    }
+   besttours1 = find_best_sector1();
+   besttours2 = find_best_sector2();
+   besttours3 = find_best_sector3();
+   printf("\nBest voiture Sector 1 : %d\n", besttours1);
+   printf("\nBest voiture Sector 1 : %d\n", besttours2);
+   printf("\nBest voiture Sector 1 : %d\n\n", besttours3);
    //usleep(100);
 }
 
