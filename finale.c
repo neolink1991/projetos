@@ -46,7 +46,6 @@ typedef struct{
 
 int shm_id1;
 voiture * shm_Pt;
-voiture tricars[NBCARS];
 voiture cars[NBCARS];
 
 /**
@@ -146,7 +145,6 @@ void fct_sector(int i){
     shm_Pt[i].distance = 0;
     shm_Pt[i].chrono.s1 = 0;
     shm_Pt[i].chrono.s2 = 0;
-    //shm_Pt[i].chrono.s3 = 0;
   }
 }
 
@@ -569,12 +567,17 @@ int main() {
   scanf("%d", &choix);
 
   switch(choix) {
-    case 1 :  periode_essai(); break;
-    case 2 :  break;
-    case 3 :  { /** COURSE**/
+    case 1 :  {
+                periode_essai();
+                break;
+              }
+    case 2 :  {
+                break;
+              }
+    case 3 :  {
                 competition();
                 break;
-              } /** FIN COURSE**/
+              }
     }
   }
   return(0);
