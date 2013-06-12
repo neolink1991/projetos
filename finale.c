@@ -19,10 +19,9 @@
 #define Q2 900  //  | -> Temps en seconde pour les qualifications
 #define Q3 600  //  |
 #define NBRSECTEUR 3 //Nombre de secteur du circuit
-#define DISTTOUR 1984 // taille du circuit
 #define DISTSECTEUR1 450 //  longueur du secteur 1
 #define DISTSECTEUR2 620    //longueyr du secteur 2
-#define DISTSECTEUR3 964    //longeur du secteur 36
+#define DISTSECTEUR3 1600    //longeur du secteur 36
 #define NBCARS 24   //Nombre de voitures participantes
 #define MAXPIT 3// Maximum de pit par voitures
 #define RED "\x1b[31m"
@@ -147,7 +146,7 @@ void fct_sector(int i){
     shm_Pt[i].distance = 0;
     shm_Pt[i].chrono.s1 = 0;
     shm_Pt[i].chrono.s2 = 0;
-    shm_Pt[i].chrono.s3 = 0;
+    //shm_Pt[i].chrono.s3 = 0;
   }
 }
 
@@ -292,8 +291,6 @@ int fct_sempetunia() {
     perror("creating semaphore");
     exit(EXIT_FAILURE);
   }
-  //init sem pour tousnombre tiré au hazard fork
-  printf("======%d\n",semid);
   if(semctl(semid,0,SETVAL,semPetu) < 0) {
     perror("init");
     exit(EXIT_FAILURE);
@@ -436,7 +433,6 @@ void go_f1(int nfn1) {   //tableau de pid enfants
   int iii=0;
   tab_f1 = malloc(nfn1 * sizeof(pid_t));
   a = fct_sempetunia();
-  printf("a: %d\n", a);
   for ( cpt = 0; cpt < nfn1; cpt++) {
     if ((p = fork()) == 0) {
       f_un(cpt);
@@ -500,6 +496,48 @@ afficheVainqueurs() {
   }
 }
 
+void periode_essai(){
+  int i = 0;
+  printf("Debut séance d'essai 1\n");
+  sleep(5);
+  initialisation_voiture();
+  initMp();
+  system("clear");
+  while( i < DP12 ){
+    go_f1(NBCARS);
+    usleep(20);
+    triCourse();
+    affichage();
+    i++;
+  }
+  i=0;
+  printf("Debut séance d'essai 2\n");
+  sleep(5);
+  initialisation_voiture();
+  initMp();
+  system("clear");
+  while( i < DP12 ){
+    go_f1(NBCARS);
+    usleep(20);
+    triCourse();
+    affichage();
+    i++;
+  }
+  i=0;
+  printf("Debut séance d'essai 3\n");
+  sleep(5);
+  initialisation_voiture();
+  initMp();
+  system("clear");
+  while( i < DP3 ){
+    go_f1(NBCARS);
+    usleep(20);
+    triCourse();
+    affichage();
+    i++;
+  }
+}
+
 void competition(){
   int last = NBCARS -1;
   while (shm_Pt[last].nbTour < NBTOURS) {
@@ -531,7 +569,7 @@ int main() {
   scanf("%d", &choix);
 
   switch(choix) {
-    case 1 :  break;
+    case 1 :  periode_essai(); break;
     case 2 :  break;
     case 3 :  { /** COURSE**/
                 competition();
@@ -541,30 +579,3 @@ int main() {
   }
   return(0);
 }
-
-/**
- * MAIN
-   ANCIEN
-**/
-
-/**
-int main() {
-  //Random aléatoire pour chaque coup du rand();.
-  int valeurMax = 100;
-  int i, copie;
-
-  fct_open_shm();
-  initialisation_voiture();
-  initMp();
-
-  for(i=0; i<valeurMax; i++) {
-    go_f1(NBCARS);
-    usleep(20);
-    triCourse();
-    affichage();
-    printf("===========%d\n",i);
-  }
-  return(0);
-}
-
-**/
